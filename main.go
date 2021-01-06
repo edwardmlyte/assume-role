@@ -56,6 +56,7 @@ func main() {
 	var (
 		duration = flag.Duration("duration", time.Hour, "The duration that the credentials will be valid for.")
 		format   = flag.String("format", defaultFormat(), "Format can be 'bash' or 'powershell'.")
+		mfa      = flag.String("mfa", "", "The MFA code to use")
 	)
 	flag.Parse()
 	argv := flag.Args()
@@ -63,6 +64,9 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	fmt.Printf("duration: %s", *duration)
+	fmt.Printf("mfa: %s", *mfa)
 
 	stscreds.DefaultDuration = *duration
 
@@ -73,7 +77,7 @@ func main() {
 	var creds *credentials.Value
 	var err error
 	if roleArnRe.MatchString(role) {
-		creds, err = assumeRole(role, "", *duration)
+		creds, err = assumeRole(role, *mfa, *duration)
 	} else if _, err = os.Stat(configFilePath); err == nil {
 		fmt.Fprintf(os.Stderr, "WARNING: using deprecated role file (%s), switch to config file"+
 			" (https://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html)\n",
